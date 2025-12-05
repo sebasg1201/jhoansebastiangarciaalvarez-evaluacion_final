@@ -48,3 +48,4 @@ if($_POST){
     <input type="password" name="password" placeholder="Contraseña" required><br><br>
     <button type="submit">Guardar estudiante</button>
 </form>
+<a href="panel.php">Volver</a>

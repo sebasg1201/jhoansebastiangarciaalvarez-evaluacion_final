@@ -15,3 +15,4 @@ if($_POST){
     <input name="descripcion" placeholder="Descripcion">
     <button type="submit">guardar</button>
 </form>
+<a href="panel.php">Volver</a>

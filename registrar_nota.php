@@ -69,4 +69,7 @@ if ($_POST){
     <input name="nota" type="number" step="0.1" min="0" max="5" required>
     
     <button type="submit">Guardar Nota</button>
+
+    <a href="panel.php">Volver</a>
+
 </form>

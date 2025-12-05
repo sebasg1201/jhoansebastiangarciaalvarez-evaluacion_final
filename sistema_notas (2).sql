@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-12-2025 a las 23:01:07
+-- Tiempo de generación: 05-12-2025 a las 21:45:55
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -33,13 +33,6 @@ CREATE TABLE `asignaturas` (
   `descripcion` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `asignaturas`
---
-
-INSERT INTO `asignaturas` (`id`, `nombre`, `descripcion`) VALUES
-(1, 'castellano', 'sdafkjsd');
-
 -- --------------------------------------------------------
 
 --
@@ -50,15 +43,9 @@ CREATE TABLE `estudiante` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
   `apellido` varchar(100) DEFAULT NULL,
-  `documento` varchar(20) NOT NULL
+  `documento` varchar(20) NOT NULL,
+  `usuario_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `estudiante`
---
-
-INSERT INTO `estudiante` (`id`, `nombre`, `apellido`, `documento`) VALUES
-(1, 'maicol', 'maecha', '1105461467');
 
 -- --------------------------------------------------------
 
@@ -73,12 +60,24 @@ CREATE TABLE `notas` (
   `nota` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Volcado de datos para la tabla `notas`
+-- Estructura de tabla para la tabla `rol`
 --
 
-INSERT INTO `notas` (`id`, `estudiante_id`, `asignatura_id`, `nota`) VALUES
-(1, 1, 1, 4);
+CREATE TABLE `rol` (
+  `id` int(11) NOT NULL,
+  `nombre_rol` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `rol`
+--
+
+INSERT INTO `rol` (`id`, `nombre_rol`) VALUES
+(1, 'admin'),
+(3, 'estudiante');
 
 -- --------------------------------------------------------
 
@@ -91,15 +90,15 @@ CREATE TABLE `usuario` (
   `nombre` varchar(100) NOT NULL,
   `correo` varchar(120) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `rol` enum('admin') DEFAULT 'admin'
+  `rol_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`id`, `nombre`, `correo`, `password`, `rol`) VALUES
-(1, 'sebas3', 'sebastian@gmial.com', '$2y$10$623LOQ3Zipns9FSG1Q8KvuE72EM3zMr1eF//dnqa5arl8rEdsDHDG', 'admin');
+INSERT INTO `usuario` (`id`, `nombre`, `correo`, `password`, `rol_id`) VALUES
+(10, 'sebas3', 'sebastian@gmial.com', '$2y$10$T/k3Hxl/GmThmFciezi02eZ2u4zq398IK7GtYYJYPUQo5SJu9O1gm', 1);
 
 --
 -- Índices para tablas volcadas
@@ -116,7 +115,8 @@ ALTER TABLE `asignaturas`
 --
 ALTER TABLE `estudiante`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `documento` (`documento`);
+  ADD UNIQUE KEY `documento` (`documento`),
+  ADD KEY `fk_estudiante_usuario` (`usuario_id`);
 
 --
 -- Indices de la tabla `notas`
@@ -127,10 +127,18 @@ ALTER TABLE `notas`
   ADD KEY `asignatura_id` (`asignatura_id`);
 
 --
+-- Indices de la tabla `rol`
+--
+ALTER TABLE `rol`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `nombre_rol` (`nombre_rol`);
+
+--
 -- Indices de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_usuario_rol` (`rol_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -140,29 +148,41 @@ ALTER TABLE `usuario`
 -- AUTO_INCREMENT de la tabla `asignaturas`
 --
 ALTER TABLE `asignaturas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `estudiante`
 --
 ALTER TABLE `estudiante`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `notas`
 --
 ALTER TABLE `notas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `rol`
+--
+ALTER TABLE `rol`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `usuario`
 --
 ALTER TABLE `usuario`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `estudiante`
+--
+ALTER TABLE `estudiante`
+  ADD CONSTRAINT `fk_estudiante_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuario` (`id`);
 
 --
 -- Filtros para la tabla `notas`
@@ -170,6 +190,12 @@ ALTER TABLE `usuario`
 ALTER TABLE `notas`
   ADD CONSTRAINT `notas_ibfk_1` FOREIGN KEY (`estudiante_id`) REFERENCES `estudiante` (`id`),
   ADD CONSTRAINT `notas_ibfk_2` FOREIGN KEY (`asignatura_id`) REFERENCES `asignaturas` (`id`);
+
+--
+-- Filtros para la tabla `usuario`
+--
+ALTER TABLE `usuario`
+  ADD CONSTRAINT `fk_usuario_rol` FOREIGN KEY (`rol_id`) REFERENCES `rol` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
