@@ -1,24 +1,45 @@
-<?php
+<?php 
 session_start();
 include "conexion.php";
 
-if($_POST){
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+
     $correo = $_POST['correo'];
     $pass = $_POST['password'];
 
-    $sql = "SELECT * FROM usuario WHERE correo = '$correo'";
-    $result = $conexion->query($sql);
-    
+    $sql = "SELECT u.id, u.nombre, u.correo, u.password, u.rol_id, r.nombre_rol 
+            FROM usuario u
+            INNER JOIN rol r ON u.rol_id = r.id
+            WHERE u.correo = ?";
+
+    $stmt = $conexion->prepare($sql);
+    $stmt->bind_param("s", $correo);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
     if($result->num_rows > 0){
         $user = $result->fetch_assoc();
+
         if(password_verify($pass, $user['password'])){
-            $_SESSION['admin'] = $user['nombre'];
-            header("location: panel.php");
-            exit(); 
-        }else{
+
+            $_SESSION['usuario_id'] = $user['id'];
+            $_SESSION['nombre']     = $user['nombre'];
+            $_SESSION['rol']        = $user['nombre_rol'];
+            if($user['nombre_rol'] == 'admin'){
+                header("Location: panel.php");
+                exit();
+            }
+            if($user['nombre_rol'] == 'estudiante'){
+                header("Location: estudiante_panel.php");
+                exit();
+            }
+            echo "Rol no reconocido.";
+        } 
+        else {
             echo "Contraseña incorrecta";
         }
-    }else{
+    } 
+    else {
         echo "Usuario no existente";
     }
 }
